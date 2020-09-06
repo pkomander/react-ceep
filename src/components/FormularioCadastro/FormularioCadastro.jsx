@@ -1,21 +1,39 @@
 import React, { Component } from "react";
 import "./estilo.css";
 class FormularioCadastro extends Component {
-
   constructor(props) {
     super(props);
     this.titulo = "";
     this.texto = "";
+    this.categoria = "Sem Categoria";
+    this.state = { categorias: [] }
+
+    this._novasCategorias = this._novasCategorias.bind(this);
   }
 
+  componentDidMount() {
+    this.props.categorias.inscrever(this._novasCategorias);
+  }
 
+  componentWillUnmount() {
+    this.props.categorias.desinscrever(this._novasCategorias);
+  }
+
+  // setState e responsavel por renderizar os elementos pais e seus filhos na pagina.
+  _novasCategorias(categorias) {
+    this.setState({ ...this.state, categorias })
+  }
+  _handleMudancaCategoria(evento) {
+    evento.stopPropagation();
+    this.categoria = evento.target.value;
+  }
   // handler faz a mudanca do titulo gerando um evento
   _handleMudancaTitulo(evento) {
     evento.stopPropagation();
     this.titulo = evento.target.value;
   }
 
-  _handleMudancaoTexto(evento) {
+  _handleMudancaTexto(evento) {
     evento.stopPropagation();
     this.texto = evento.target.value;
   }
@@ -23,7 +41,7 @@ class FormularioCadastro extends Component {
   _criarNota(evento) {
     evento.preventDefault();
     evento.stopPropagation();
-    this.props.criarNota(this.titulo, this.texto);
+    this.props.criarNota(this.titulo, this.texto, this.categoria);
   }
 
   // o this no js e dinamico
@@ -31,8 +49,17 @@ class FormularioCadastro extends Component {
   // deve utilzar o bind para fazer a ligação entre os eventos
   render() {
     return (
-      <form className="form-cadastro "
-        onSubmit={this._criarNota.bind(this)}>
+      <form className="form-cadastro" onSubmit={this._criarNota.bind(this)}>
+        <select
+          onChange={this._handleMudancaCategoria.bind(this)}
+          className="form-cadastro_input"
+        >
+          <option>Sem Categoria</option>
+
+          {this.state.categorias.map((categoria, index) => {
+            return <option key={index} >{categoria}</option>;
+          })}
+        </select>
         <input
           type="text"
           placeholder="Título"
@@ -43,7 +70,7 @@ class FormularioCadastro extends Component {
           rows={15}
           placeholder="Escreva sua nota..."
           className="form-cadastro_input"
-          onChange={this._handleMudancaoTexto.bind(this)}
+          onChange={this._handleMudancaTexto.bind(this)}
         />
         <button className="form-cadastro_input form-cadastro_submit">
           Criar Nota
